@@ -17,6 +17,8 @@ import pickle
 import itertools
 
 import numpy as np
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 import pandas as pd
 
 from tabulate import tabulate
@@ -29,7 +31,8 @@ from tradingEnv import TradingEnv
 from tradingPerformance import PerformanceEstimator
 from timeSeriesAnalyser import TimeSeriesAnalyser
 from TDQN import TDQN
-
+import csv
+import csv
 
 
 ###############################################################################
@@ -37,9 +40,9 @@ from TDQN import TDQN
 ###############################################################################
 
 # Variables defining the default trading horizon
-startingDate = '2012-1-1'
-endingDate = '2020-1-1'
-splitingDate = '2018-1-1'
+startingDate = '2019-12-31'
+endingDate = '2023-12-31'
+splitingDate = '2020-12-31'
 
 # Variables defining the default observation and state spaces
 stateLength = 30
@@ -51,12 +54,14 @@ percentageCosts = [0, 0.1, 0.2]
 transactionCosts = percentageCosts[1]/100
 
 # Variables specifying the default capital at the disposal of the trader
-money = 100000
+money = 10000
 
 # Variables specifying the default general training parameters
 bounds = [1, 30]
 step = 1
-numberOfEpisodes = 50
+numberOfEpisodes = 10
+
+# Supress numpy warnings
 
 # Dictionary listing the fictive stocks supported
 fictives = {
@@ -97,7 +102,8 @@ stocks = {
     'Toyota' : '7203.T',
     'Coca Cola' : 'KO',
     'AB InBev' : 'ABI.BR',
-    'Kirin' : '2503.T'
+    'Kirin' : '2503.T',
+
 }
 
 # Dictionary listing the 5 trading indices considered as testbench
@@ -111,31 +117,107 @@ indices = {
 
 # Dictionary listing the 25 company stocks considered as testbench
 companies = {
-    'Google' : 'GOOGL',
-    'Apple' : 'AAPL',
-    'Facebook' : 'FB',
-    'Amazon' : 'AMZN',
-    'Microsoft' : 'MSFT',
-    'Twitter' : 'TWTR',
-    'Nokia' : 'NOK',
-    'Philips' : 'PHIA.AS',
-    'Siemens' : 'SIE.DE',
-    'Baidu' : 'BIDU',
-    'Alibaba' : 'BABA',
-    'Tencent' : '0700.HK',
-    'Sony' : '6758.T',
-    'JPMorgan Chase' : 'JPM',
-    'HSBC' : 'HSBC',
-    'CCB' : '0939.HK',
-    'ExxonMobil' : 'XOM',
-    'Shell' : 'RDSA.AS',
-    'PetroChina' : 'PTR',
-    'Tesla' : 'TSLA',
-    'Volkswagen' : 'VOW3.DE',
-    'Toyota' : '7203.T',
-    'Coca Cola' : 'KO',
-    'AB InBev' : 'ABI.BR',
-    'Kirin' : '2503.T'
+    'Apple Inc': 'AAPL',
+    'Abbvie Inc': 'ABBV',
+    'Abbott Laboratories': 'ABT',
+    'Accenture Plc': 'ACN',
+    'Adobe Systems Inc': 'ADBE',
+    'American International Group': 'AIG',
+    'Adv Micro Devices': 'AMD',
+    'Amgen Inc': 'AMGN',
+    'American Tower Corp': 'AMT',
+    'Amazon.com Inc': 'AMZN',
+    'Broadcom Ltd': 'AVGO',
+    'American Express Company': 'AXP',
+    'Boeing Company': 'BA',
+    'Bank of America Corp': 'BAC',
+    'Bank of New York Mellon Corp': 'BK',
+    'Booking Holdings Inc': 'BKNG',
+    'Blackrock Inc': 'BLK',
+    'Bristol-Myers Squibb Company': 'BMY',
+    'Berkshire Hathaway Cl B': 'BRK.B',
+    'Citigroup Inc': 'C',
+    'Caterpillar Inc': 'CAT',
+    'Charter Communications Inc': 'CHTR',
+    'Colgate-Palmolive Company': 'CL',
+    'Comcast Corp A': 'CMCSA',
+    'Capital One Financial Corp': 'COF',
+    'ConocoPhillips': 'COP',
+    'Costco Wholesale': 'COST',
+    'Salesforce Inc': 'CRM',
+    'Cisco Systems Inc': 'CSCO',
+    'CVS Corp': 'CVS',
+    'Chevron Corp': 'CVX',
+    'Deere & Company': 'DE',
+    'Danaher Corp': 'DHR',
+    'Walt Disney Company': 'DIS',
+    'Dow Inc': 'DOW',
+    'Duke Energy Corp': 'DUK',
+    'Emerson Electric Company': 'EMR',
+    'Ford Motor Company': 'F',
+    'Fedex Corp': 'FDX',
+    'General Dynamics Corp': 'GD',
+    'General Electric Company': 'GE',
+    'Gilead Sciences Inc': 'GILD',
+    'General Motors Company': 'GM',
+    'Alphabet Cl C': 'GOOG',
+    'Alphabet Cl A': 'GOOGL',
+    'Goldman Sachs Group': 'GS',
+    'Home Depot': 'HD',
+    'Honeywell International Inc': 'HON',
+    'International Business Machines': 'IBM',
+    'Intel Corp': 'INTC',
+    'Intuit Inc': 'INTU',
+    'Johnson & Johnson': 'JNJ',
+    'JP Morgan Chase & Company': 'JPM',
+    'Kraft Heinz Company': 'KHC',
+    'Coca-Cola Company': 'KO',
+    'Linde Plc': 'LIN',
+    'Eli Lilly and Company': 'LLY',
+    'Lockheed Martin Corp': 'LMT',
+    'Lowe\'s Companies': 'LOW',
+    'Mastercard Inc': 'MA',
+    'McDonald\'s Corp': 'MCD',
+    'Mondelez Intl Inc': 'MDLZ',
+    'Medtronic Inc': 'MDT',
+    'Metlife Inc': 'MET',
+    'Meta Platforms Inc': 'META',
+    '3M Company': 'MMM',
+    'Altria Group': 'MO',
+    'Merck & Company': 'MRK',
+    'Morgan Stanley': 'MS',
+    'Microsoft Corp': 'MSFT',
+    'Nextera Energy': 'NEE',
+    'Netflix Inc': 'NFLX',
+    'Nike Inc': 'NKE',
+    'Nvidia Corp': 'NVDA',
+    'Oracle Corp': 'ORCL',
+    'Pepsico Inc': 'PEP',
+    'Pfizer Inc': 'PFE',
+    'Procter & Gamble Company': 'PG',
+    'Philip Morris International Inc': 'PM',
+    'Paypal Holdings': 'PYPL',
+    'Qualcomm Inc': 'QCOM',
+    'Rtx Corp': 'RTX',
+    'Starbucks Corp': 'SBUX',
+    'The Charles Schwab Corp': 'SCHW',
+    'Southern Company': 'SO',
+    'Simon Property Group': 'SPG',
+    'AT&T Inc': 'T',
+    'Target Corp': 'TGT',
+    'Thermo Fisher Scientific Inc': 'TMO',
+    'T-Mobile US': 'TMUS',
+    'Tesla Inc': 'TSLA',
+    'Texas Instruments': 'TXN',
+    'Unitedhealth Group Inc': 'UNH',
+    'Union Pacific Corp': 'UNP',
+    'United Parcel Service': 'UPS',
+    'U.S. Bancorp': 'USB',
+    'Visa Inc': 'V',
+    'Verizon Communications Inc': 'VZ',
+    'Wells Fargo & Company': 'WFC',
+    'Walmart Inc': 'WMT',
+    'Exxon Mobil Corp': 'XOM',
 }
 
 # Dictionary listing the classical trading strategies supported
@@ -320,6 +402,8 @@ class TradingSimulator:
         ax1.legend(["Price", "Long",  "Short", "Train/Test separation"])
         ax2.legend(["Capital", "Long", "Short", "Train/Test separation"])
         plt.savefig(''.join(['Figures/', str(trainingEnv.marketSymbol), '_TrainingTestingRendering', '.png'])) 
+        plt.close('all')
+        del fig
         #plt.show()
 
 
@@ -329,7 +413,7 @@ class TradingSimulator:
                             money=money, stateLength=stateLength, transactionCosts=transactionCosts,
                             bounds=bounds, step=step, numberOfEpisodes=numberOfEpisodes,
                             verbose=True, plotTraining=True, rendering=True, showPerformance=True,
-                            saveStrategy=False):
+                            saveStrategy=False, silent=True):
         """
         GOAL: Simulate a new trading strategy on a certain stock included in the
               testbench, with both learning and testing phases.
@@ -432,9 +516,15 @@ class TradingSimulator:
         # Show the entire unified rendering of the training and testing phases
         if rendering:
             self.plotEntireTrading(trainingEnv, testingEnv)
-
+            
 
         # 4. TERMINATION PHASE
+        file_path = "Figures/" + stockName + ".csv"
+        with open(file_path, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(['ticker', stockName])
+            for row in PerformanceEstimator(testingEnv.data).computePerformance():
+                writer.writerow(row)
 
         # If required, save the trading strategy with Pickle
         if(saveStrategy):
@@ -616,7 +706,14 @@ class TradingSimulator:
             for i in range(len(performanceTable)):
                 performanceTable[i].append(performance[i][1])
 
+        # Save performanceTable to a CSV file
+        csv_file = f"Figures/{stock}.csv"
+        with open(csv_file, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerows(performanceTable)
+
         # Display the performance table computed
+        print(f"Performance table saved as {csv_file}")
         tabulation = tabulate(performanceTable, headers, tablefmt="fancy_grid", stralign="center")
         print(tabulation)
 
@@ -687,7 +784,13 @@ class TradingSimulator:
             for i in range(len(performanceTable)):
                 performanceTable[i].append(performance[i][1])
 
-        # Display the performance table
+        # Save performanceTable to a CSV file
+        csv_file = f"Figures/{stockName}.csv"
+        with open(csv_file, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerows(performanceTable)
+
+        print(f"Performance table saved as {csv_file}")
         tabulation = tabulate(performanceTable, headers, tablefmt="fancy_grid", stralign="center")
         print(tabulation)
 

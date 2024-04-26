@@ -41,7 +41,7 @@ from tradingEnv import TradingEnv
 
 # Default parameters related to the DQN algorithm
 gamma = 0.4
-learningRate = 0.0001
+learningRate = 0.05
 targetNetworkUpdate = 1000
 learningUpdatePeriod = 1
 
@@ -377,8 +377,7 @@ class TDQN:
         self.iterations = 0
 
         # Initialization of the tensorboard writer
-        self.writer = SummaryWriter('runs/' + datetime.datetime.now().strftime("%d/%m/%Y-%H:%M:%S"))
-
+        self.writer = SummaryWriter('runs/' + datetime.datetime.now().strftime("%Y/%m/%d"))
     
     def getNormalizationCoefficients(self, tradingEnv):
         """
@@ -655,7 +654,7 @@ class TDQN:
             # Testing performance
             marketSymbol = trainingEnv.marketSymbol
             startingDate = trainingEnv.endingDate
-            endingDate = '2020-1-1'
+            endingDate = '2024-4-4'
             money = trainingEnv.data['Money'][0]
             stateLength = trainingEnv.stateLength
             transactionCosts = trainingEnv.transactionCosts
@@ -901,8 +900,8 @@ class TDQN:
 
         # Initialization of the testing trading environment
         marketSymbol = trainingEnv.marketSymbol
-        startingDate = trainingEnv.endingDate
-        endingDate = '2020-1-1'
+        startingDate = trainingEnv.startingDate
+        endingDate = trainingEnv.endingDate
         money = trainingEnv.data['Money'][0]
         stateLength = trainingEnv.stateLength
         transactionCosts = trainingEnv.transactionCosts

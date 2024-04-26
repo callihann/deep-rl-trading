@@ -341,4 +341,4 @@ class PerformanceEstimator:
         headers = ["Performance Indicator", name]
         tabulation = tabulate(self.performanceTable, headers, tablefmt="fancy_grid", stralign="center")
         print(tabulation)
-    
+

@@ -113,8 +113,7 @@ class TradingEnv(gym.Env):
                 try:
                     self.data = downloader1.getDailyData(marketSymbol, startingDate, endingDate)
                 except:
-                    self.data = downloader2.getDailyData(marketSymbol, startingDate, endingDate)
-
+                    return None
                 if saving == True:
                     csvConverter.dataframeToCSV(csvName, self.data)
 

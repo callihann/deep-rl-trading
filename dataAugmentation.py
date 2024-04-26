@@ -163,11 +163,10 @@ class DataAugmentation:
             newTradingEnv.data['High'][i] = tradingEnv.data['High'][i]
             newTradingEnv.data['Volume'][i] = tradingEnv.data['Volume'][i]
         newTradingEnv.data['Open'] = newTradingEnv.data['Close'].shift(1)
-        newTradingEnv.data['Open'][0] = tradingEnv.data['Open'][0]
+        newTradingEnv.data['Open'][1] = tradingEnv.data['Open'][0]
 
         # Return the new trading environment generated
         return newTradingEnv
-
 
     def generate(self, tradingEnv):
         """

@@ -4,6 +4,7 @@ Experimental code supporting the results presented in the scientific research pa
 > [[arxiv]](https://arxiv.org/abs/2004.06627)
 
 
+This is a fork of Thibaut Théate's model. Please note that there are numerous features removed and some hardcoded changes. Support will not be provided.
 
 # Dependencies
 

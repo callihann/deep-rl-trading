@@ -12,7 +12,8 @@ Institution: University of Liège
 ###############################################################################
 
 import pandas as pd
-import pandas_datareader as pdr
+import pandas_datareader.data as web
+import yfinance as yf
 import requests
 
 from io import StringIO
@@ -50,7 +51,7 @@ class AlphaVantage:
         """
         
         self.link = 'https://www.alphavantage.co/query'
-        self.apikey = 'APIKEY'
+        self.apikey = '19BPMTS5HX6O3R4C'
         self.datatype = 'csv'
         self.outputsize = 'full'
         self.data = pd.DataFrame()
@@ -74,6 +75,7 @@ class AlphaVantage:
         response = requests.get(self.link, params=payload)
         
         # Process the CSV file retrieved
+        print(response.text)
         csvText = StringIO(response.text)
         data = pd.read_csv(csvText, index_col='timestamp')
         
@@ -191,8 +193,8 @@ class YahooFinance:
           
         OUTPUTS:    - data: Pandas dataframe containing the stock market data.
         """
-        
-        data = pdr.data.DataReader(marketSymbol, 'yahoo', startingDate, endingDate)
+        print(f"{marketSymbol}, {startingDate}, {endingDate}")
+        data = yf.download(marketSymbol, start=startingDate, end=endingDate)
         self.data = self.processDataframe(data)
         return self.data
 
@@ -209,11 +211,10 @@ class YahooFinance:
         # Remove useless columns
         dataframe['Close'] = dataframe['Adj Close']
         del dataframe['Adj Close']
-        
         # Adapt the dataframe index and column names
         dataframe.index.names = ['Timestamp']
+        dataframe.fillna(0)
         dataframe = dataframe[['Open', 'High', 'Low', 'Close', 'Volume']]
-
         return dataframe
 
 

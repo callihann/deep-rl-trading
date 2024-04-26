@@ -21,8 +21,8 @@ from tradingSimulator import TradingSimulator
 ###############################################################################
 
 if(__name__ == '__main__'):
-
     # Retrieve the paramaters sent by the user
+    
     parser = argparse.ArgumentParser(description='')
     parser.add_argument("-strategy", default='TDQN', type=str, help="Name of the trading strategy")
     parser.add_argument("-stock", default='Apple', type=str, help="Name of the stock (market)")
@@ -34,7 +34,8 @@ if(__name__ == '__main__'):
     stock = args.stock
 
     # Training and testing of the trading strategy specified for the stock (market) specified
-    simulator.simulateNewStrategy(strategy, stock, saveStrategy=False)
+    # simulator.simulateNewStrategy(strategy, stock, saveStrategy=False)
+    simulator.evaluateStrategy(strategy, saveStrategy=False)
     """
     simulator.displayTestbench()
     simulator.analyseTimeSeries(stock)
